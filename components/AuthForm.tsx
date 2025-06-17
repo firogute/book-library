@@ -1,9 +1,107 @@
-import React from "react";
+"use client";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  DefaultValues,
+  FieldValues,
+  Path,
+  SubmitHandler,
+  useForm,
+  UseFormReturn,
+} from "react-hook-form";
+import { z, ZodTypeAny } from "zod";
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import Link from "next/link";
+import { FIELD_NAMES } from "@/constants";
 
-// interface Props<T extends FieldValues>
+interface Props<T extends FieldValues> {
+  schema: ZodTypeAny;
+  defaultValues: T;
+  onSubmit: (data: T) => Promise<{ success: boolean; error?: string }>;
+  type: "SIGN_IN" | "SIGN_UP";
+}
 
-const AuthForm = ({ type, schema, defaultValues, onSubmit }: Props) => {
-  return <div>AuthForm -- {type}</div>;
+const AuthForm = <T extends FieldValues>({
+  type,
+  schema,
+  defaultValues,
+  onSubmit,
+}: Props<T>) => {
+  const isSignIn = type === "SIGN_IN";
+  const form: UseFormReturn<T> = useForm({
+    resolver: zodResolver(schema),
+    defaultValues: defaultValues as DefaultValues<T>,
+  });
+
+  // 2. Define a submit handler.
+  const handleSubmit: SubmitHandler<T> = async (data) => {
+    // Do something with the form values.
+    // ✅ This will be type-safe and validated.
+    console.log(data);
+  };
+  return (
+    <div className="flex flex-col gap-4">
+      <h1 className="text-2xl font-semibold text-white">
+        {isSignIn ? "Welcome back to BookWise" : "Create your library account"}
+      </h1>
+      <p className="text-light-100">
+        {isSignIn
+          ? "Access the vast collection of resources, and stay updated"
+          : "Please complete all fields and upload a valid university ID to gain access to the library"}
+      </p>
+      <Form {...form}>
+        <form
+          onSubmit={form.handleSubmit(handleSubmit)}
+          className="space-y-6 w-full"
+        >
+          {Object.keys(defaultValues).map((field) => {
+            return (
+              <FormField
+                key={field}
+                control={form.control}
+                name={field as Path<T>}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="capitalize">
+                      {FIELD_NAMES[field]}
+                    </FormLabel>
+                    <FormControl>
+                      <Input placeholder="shadcn" {...field} />
+                    </FormControl>
+                    <FormDescription>
+                      This is your public display name.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            );
+          })}
+
+          <Button type="submit">Submit</Button>
+        </form>
+      </Form>
+
+      <p className="text-center text-base font-medium">
+        {isSignIn ? "New to Bookwise " : "Already have an account? "}
+        <Link
+          href={isSignIn ? "/sign-up" : "/sign-in"}
+          className="font-bold text-primary"
+        >
+          {isSignIn ? "Create an account" : "Sign In"}
+        </Link>
+      </p>
+    </div>
+  );
 };
 
 export default AuthForm;
