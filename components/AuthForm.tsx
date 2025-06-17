@@ -21,7 +21,8 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
-import { FIELD_NAMES } from "@/constants";
+import { FIELD_NAMES, FIELD_TYPES } from "@/constants";
+import ImageUpload from "./ImageUpload";
 
 interface Props<T extends FieldValues> {
   schema: ZodTypeAny;
@@ -69,30 +70,44 @@ const AuthForm = <T extends FieldValues>({
                 key={field}
                 control={form.control}
                 name={field as Path<T>}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="capitalize">
-                      {FIELD_NAMES[field]}
-                    </FormLabel>
-                    <FormControl>
-                      <Input placeholder="shadcn" {...field} />
-                    </FormControl>
-                    <FormDescription>
-                      This is your public display name.
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                render={({ field }) => {
+                  return (
+                    <FormItem>
+                      <FormLabel className="capitalize">
+                        {FIELD_NAMES[field.name as keyof typeof FIELD_NAMES]}
+                      </FormLabel>
+                      <FormControl>
+                        {field.name === "universityCard" ? (
+                          <ImageUpload />
+                        ) : (
+                          <Input
+                            required
+                            type={
+                              FIELD_TYPES[
+                                field.name as keyof typeof FIELD_TYPES
+                              ]
+                            }
+                            {...field}
+                            className="form-input"
+                          />
+                        )}
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  );
+                }}
               />
             );
           })}
 
-          <Button type="submit">Submit</Button>
+          <Button type="submit" className="form-btn">
+            {isSignIn ? "Sign In" : "Sign Up"}
+          </Button>
         </form>
       </Form>
 
       <p className="text-center text-base font-medium">
-        {isSignIn ? "New to Bookwise " : "Already have an account? "}
+        {isSignIn ? "New to Bookwise? " : "Already have an account? "}
         <Link
           href={isSignIn ? "/sign-up" : "/sign-in"}
           className="font-bold text-primary"
