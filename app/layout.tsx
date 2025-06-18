@@ -40,7 +40,7 @@ const RootLayout = ({ children }: { children: ReactNode }) => (
       className={` ${ibmPlexSans.className} ${bebasNeue.className} antialiased`}
     >
       {children}
-      <Toaster />
+      <Toaster position="top-right" />
     </body>
   </html>
 );
