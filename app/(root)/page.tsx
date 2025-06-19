@@ -2,15 +2,21 @@ import BookList from "@/components/BookList";
 import BookOverview from "@/components/BookOverview";
 import { Button } from "@/components/ui/button";
 import { sampleBooks } from "@/constants";
+import { db } from "@/db/drizzle";
+import { users } from "@/db/schema";
 
-const Home = () => (
-  <>
-    <BookOverview {...sampleBooks[0]} />
-    <BookList
-      title="Latest Books"
-      books={sampleBooks}
-      containerClassName="mt-28"
-    />
-  </>
-);
+const Home = async () => {
+  const result = await db.select().from(users);
+
+  return (
+    <>
+      <BookOverview {...sampleBooks[0]} />
+      <BookList
+        title="Latest Books"
+        books={sampleBooks}
+        containerClassName="mt-28"
+      />
+    </>
+  );
+};
 export default Home;
