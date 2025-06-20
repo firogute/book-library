@@ -23,6 +23,8 @@ import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { FIELD_NAMES, FIELD_TYPES } from "@/constants";
 import ImageUpload from "./ImageUpload";
+import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 interface Props<T extends FieldValues> {
   schema: ZodTypeAny;
@@ -37,17 +39,29 @@ const AuthForm = <T extends FieldValues>({
   defaultValues,
   onSubmit,
 }: Props<T>) => {
+  const router = useRouter();
   const isSignIn = type === "SIGN_IN";
   const form: UseFormReturn<T> = useForm({
     resolver: zodResolver(schema),
     defaultValues: defaultValues as DefaultValues<T>,
   });
 
-  // 2. Define a submit handler.
   const handleSubmit: SubmitHandler<T> = async (data) => {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
-    console.log(data);
+    const result = await onSubmit(data);
+
+    if (result.success) {
+      toast("Success", {
+        description: isSignIn
+          ? "You have successfully signed in."
+          : "You have successfully signed up.",
+      });
+    } else {
+      toast.error(`Error ${isSignIn ? "signing in" : "signing up"}`, {
+        description: result.error ?? "An error occurred",
+      });
+    }
+
+    router.push("/");
   };
   return (
     <div className="flex flex-col gap-4">
