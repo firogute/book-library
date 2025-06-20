@@ -30,15 +30,18 @@ const Header = ({ session }: { session: Session }) => {
             Library
           </Link>
         </li>
-        <li className="flex items-center justify-center gap-2">
-          <Link href="/my-profile">
+        <li>
+          <Link
+            href="/my-profile"
+            className="flex items-center justify-center gap-2"
+          >
             <Avatar>
               <AvatarFallback className="bg-amber-100 text-xl">
                 {getInitials(session?.user?.name || "IN")}{" "}
               </AvatarFallback>
             </Avatar>
+            <p className="text-white">{session?.user?.name?.split(" ")[0]}</p>
           </Link>
-          <p className="text-white">{session?.user?.name?.split(" ")[0]}</p>
         </li>
       </ul>
     </header>
