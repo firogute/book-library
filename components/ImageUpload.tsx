@@ -53,7 +53,6 @@ const ImageUpload = ({
   const onSuccess = (res: any) => {
     setFile(res);
     onFileChange(res.filePath);
-    console.log(res);
 
     toast("Image Uploaded Successfully", {
       description: `${res.filePath} Uploaded Successfully`,
