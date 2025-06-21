@@ -27,7 +27,7 @@ const authenticator = async () => {
       token,
     };
   } catch (error) {
-    throw new Error(`Authentication Request Fai led: ${error.message}`);
+    throw new Error(`Authentication Request Fai led: ${error}`);
   }
 };
 const {

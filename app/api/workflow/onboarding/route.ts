@@ -1,7 +1,7 @@
 import { db } from "@/db/drizzle";
 import { users } from "@/db/schema";
-import { serve } from "@upstash/workflow/nextjs";
 import { sendEmail } from "@/lib/workflow";
+import { serve } from "@upstash/workflow/nextjs";
 import { eq } from "drizzle-orm";
 
 type UserState = "non-active" | "active";
@@ -22,6 +22,9 @@ const getUserState = async (email: string): Promise<UserState> => {
     .limit(1);
 
   if (user.length === 0) {
+    // If user does not exist, treat as "non-active" or "active" as per your logic
+    return "non-active";
+  } else {
     const lastActivityDate = new Date(user[0].lastActivityDate!);
     const now = new Date();
     const timeDifference = now.getTime() - lastActivityDate.getTime();
@@ -40,50 +43,61 @@ const getUserState = async (email: string): Promise<UserState> => {
 export const { POST } = serve<InitialData>(async (context) => {
   const { email, fullName } = context.requestPayload;
 
-  // Welcome Email
+  // 1️⃣ Send Welcome Email
   await context.run("new-signup", async () => {
-    await sendEmail("firo_template", {
-      subject: "Welcome to the platform",
-      name: fullName,
-      replyto: "firomsaguteta11@gmail.com",
-      to: email,
-      senderName: "Firomsa Guteta",
+    await sendEmail({
+      email,
+      subject: "Welcome to Our Platform!",
+      message: `
+        <div style="font-family: Arial, sans-serif; color: #333;">
+          <h1 style="color: #0052cc;">Welcome to Our Platform, ${fullName}!</h1>
+          <p>Hi ${fullName},</p>
+          <p>Thank you for joining us! We're excited to have you on board.</p>
+          <p>Get started by exploring your dashboard and discover all the amazing features we offer.</p>
+          <p>If you have any questions, feel free to reply to this email or contact our support team at <a href="mailto:support@yourcompany.com">support@yourcompany.com</a>.</p>
+          <br/>
+          <p>Best regards,<br/>Firomsa Guteta & Team</p>
+          <hr style="border:none; border-top: 1px solid #eee; margin: 20px 0;" />
+          <small style="color: #999;">This is an automated email. Please do not reply directly to this message.</small>
+        </div>
+      `,
     });
 
     return "Welcome email sent";
   });
 
+  // 2️⃣ Wait 3 days
   await context.sleep("wait-for-3-days", 60 * 60 * 24 * 3);
 
   while (true) {
     const state = await context.run("check-user-state", async () => {
-      return await getUserState(email);
+      return await getUserState(email); // must return "active" or "non-active"
     });
 
+    // 3️⃣ Non-active email
     if (state === "non-active") {
       await context.run("send-email-non-active", async () => {
-        await sendEmail("inactivity_template", {
-          subject: "We miss you😁",
-          name: fullName,
-          replyto: "firomsaguteta11@gmail.com",
-          to: email,
-          senderName: "Firomsa Guteta",
+        await sendEmail({
+          email,
+          subject: "We Miss You at Our Platform",
+          message: `
+            <div style="font-family: Arial, sans-serif; color: #333;">
+              <h1 style="color: #e55353;">We Miss You, ${fullName}!</h1>
+              <p>Hi ${fullName},</p>
+              <p>It looks like you haven’t logged in for a while. We’d love to have you back!</p>
+              <p>There are new features and updates waiting for you. Come check them out!</p>
+              <p>If you need assistance or have any questions, reply to this email or reach out to <a href="mailto:support@yourcompany.com">support@yourcompany.com</a>.</p>
+              <br/>
+              <p>Warm regards,<br/>Firomsa Guteta & Team</p>
+              <hr style="border:none; border-top: 1px solid #eee; margin: 20px 0;" />
+              <small style="color: #999;">This is an automated email. Please do not reply directly to this message.</small>
+            </div>
+          `,
         });
-      });
-    } else if (state === "active") {
-      await context.run("send-newsletter", async () => {
-        await sendEmail("active_user_template", {
-          subject: "Here's What's New ✨",
-          name: fullName,
-          replyto: "firomsaguteta11@gmail.com",
-          to: email,
-          senderName: "Firomsa Guteta",
-        });
-
-        return "Newsletter sent to active user";
       });
     }
 
+    // 4️⃣ Wait 30 days, check again
     await context.sleep("wait-for-1-month", 60 * 60 * 24 * 30);
   }
 });
