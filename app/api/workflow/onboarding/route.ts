@@ -49,6 +49,8 @@ export const { POST } = serve<InitialData>(async (context) => {
       to: email,
       senderName: "Firomsa Guteta",
     });
+
+    return "Welcome email sent";
   });
 
   await context.sleep("wait-for-3-days", 60 * 60 * 24 * 3);
@@ -67,6 +69,18 @@ export const { POST } = serve<InitialData>(async (context) => {
           to: email,
           senderName: "Firomsa Guteta",
         });
+      });
+    } else if (state === "active") {
+      await context.run("send-newsletter", async () => {
+        await sendEmail("active_user_template", {
+          subject: "Here's What's New ✨",
+          name: fullName,
+          replyto: "firomsaguteta11@gmail.com",
+          to: email,
+          senderName: "Firomsa Guteta",
+        });
+
+        return "Newsletter sent to active user";
       });
     }
 
