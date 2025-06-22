@@ -17,6 +17,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import FileUpload from "@/components/FileUpload";
 import ColorPicker from "../ColorPicker";
+import { createBook } from "@/lib/admin/actions/book";
+import { toast } from "sonner";
 
 interface Props extends Partial<Book> {
   type: "create" | "update";
@@ -42,7 +44,20 @@ const BookForm = ({ type, ...book }: Props) => {
     },
   });
 
-  const onSubmit = async (values: z.infer<typeof bookSchema>) => {};
+  const onSubmit = async (values: z.infer<typeof bookSchema>) => {
+    const result = await createBook(values);
+    if (result.success) {
+      toast("Success", {
+        description: "Book created successfully",
+      });
+
+      router.push(`/admin/books/${result.data?.id}`);
+    } else {
+      toast.error("Error", {
+        description: result.message,
+      });
+    }
+  };
   return (
     <div className="flex flex-col gap-4">
       <Form {...form}>
@@ -228,6 +243,7 @@ const BookForm = ({ type, ...book }: Props) => {
                     folder="books/videos"
                     variant="light"
                     onFileChange={field.onChange}
+                    value={field.value}
                   />
                 </FormControl>
                 <FormMessage />
