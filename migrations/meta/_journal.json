@@ -8,6 +8,13 @@
       "when": 1750235626405,
       "tag": "0000_sticky_veda",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1750599755473,
+      "tag": "0001_short_blindfold",
+      "breakpoints": true
     }
   ]
 }
