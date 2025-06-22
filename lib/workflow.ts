@@ -20,14 +20,18 @@ export const sendEmail = async ({
   subject: string;
   message: string;
 }) => {
+  console.log("Sending to:", email);
+  console.log("Subject:", subject);
+  console.log("HTML:", message);
+
   await qstashClient.publishJSON({
     api: {
       name: "email",
       provider: resend({ token: config.env.upstash.resendToken! }),
     },
     body: {
-      from: "Firomsa Guteta <onboarding@resend.dev>",
-      to: [email],
+      from: "onboarding@resend.dev>",
+      to: "test@resend.dev",
       subject: subject,
       html: message,
     },
