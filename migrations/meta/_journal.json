@@ -15,6 +15,13 @@
       "when": 1750599755473,
       "tag": "0001_short_blindfold",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1750651073535,
+      "tag": "0002_mixed_starbolt",
+      "breakpoints": true
     }
   ]
 }
